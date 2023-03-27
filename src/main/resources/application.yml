@@ -5,6 +5,18 @@ spring:
     username: guest
     password: guest
 
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/mes?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    username: root
+    password: 123456
+
+#起别名，mapper路径，驼峰命名规则
+mybatis:
+  type-aliases-package: com.example.iotnettyrabbitmq.pojo
+  mapper-locations: classpath:com.example.iotnettyrabbitmq.mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
 
 server:
   port: 8090

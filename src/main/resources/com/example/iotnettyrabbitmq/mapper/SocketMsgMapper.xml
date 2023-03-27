@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.iotnettyrabbitmq.mapper.SocketMsgMapper">
+
+    <resultMap id="SocketMsg" type="com.example.iotnettyrabbitmq.pojo.SocketMsg">
+        <id property="id" column="id"/>
+        <result property="equipmentId" column="equipment_id"/>
+        <result property="status_value" column="status_value"/>
+        <result property="time" column="time"/>
+        <result property="status" column="status"/>
+        <result property="cause" column="cause"/>
+        <result property="exchangName" column="exchang_name"/>
+        <result property="routingKey" column="routing_key"/>
+        <result property="queueName" column="queue_name"/>
+    </resultMap>
+
+    <!--新增保存数据-->
+    <insert id="saveMessage" parameterType="com.example.iotnettyrabbitmq.pojo.SocketMsg">
+        insert into equipment (exchang_name,routing_key,queue_name,equipment_id,status_value, time, status, cause)
+        values (#{exchangName},#{routingKey},#{queueName},#{equipmentId},#{status_value},#{time},#{status},#{cause});
+    </insert>
+
+
+</mapper>

@@ -1,6 +1,8 @@
 package com.example.iotnettyrabbitmq.netty;
 
 import com.example.iotnettyrabbitmq.pojo.PosttingObject;
+import com.example.iotnettyrabbitmq.pojo.SocketMsg;
+import com.example.iotnettyrabbitmq.service.SocketMsgService;
 import com.example.iotnettyrabbitmq.util.DateString;
 import com.rabbitmq.client.BuiltinExchangeType;
 
@@ -9,6 +11,8 @@ import com.rabbitmq.client.MessageProperties;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +40,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
 
     public Channel channel;
+
+
     ServerHandler(){
         EXCHANGE_NAME = "direct_IoT";
 
@@ -66,7 +72,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             System.out.println("生产者发出消息:" + message);
         }
         System.out.println("客户端口传来的-msg:" + msg);
-        //保存当前连接
 
 
         // 响应内容:

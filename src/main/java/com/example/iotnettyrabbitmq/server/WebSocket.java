@@ -1,7 +1,10 @@
 package com.example.iotnettyrabbitmq.server;
 
+import com.example.iotnettyrabbitmq.mapper.SocketMsgMapper;
 import com.example.iotnettyrabbitmq.pohoVo.SocketMsgVo;
 import com.example.iotnettyrabbitmq.pojo.SocketMsg;
+import com.example.iotnettyrabbitmq.service.SocketMsgService;
+import com.example.iotnettyrabbitmq.service.impl.SocketMsgServiceImpl;
 import com.example.iotnettyrabbitmq.util.Analysis;
 import com.example.iotnettyrabbitmq.util.RabbitUtil;
 import com.example.iotnettyrabbitmq.util.ServerEncoder;
@@ -9,11 +12,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
+
+import javax.annotation.PostConstruct;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,12 +55,35 @@ public class WebSocket {
     //消息数据存储的实体类对象
     private SocketMsgVo socketMsgVo = new SocketMsgVo();
 
+    //保留当前数据和前一个历史数据，用于实时数据更新
+    private  static SocketMsgVo[] socketMsgVos = new SocketMsgVo[2];
+
+    //
+
+
+    @Autowired
+    private SocketMsgMapper socketMsgMapper;
+
+    public static WebSocket webSocket;
+    @PostConstruct
+    public void init(){
+        webSocket = this;
+        webSocket.socketMsgMapper = this.socketMsgMapper;
+    }
+
+    public static int saveMessage(SocketMsg socketMsg){
+        return webSocket.socketMsgMapper.saveMessage(socketMsg);
+    }
+
+
+
     /**
      * 客户端与服务端连接成功
      * @param session
      */
     @OnOpen
     public void onOpen(Session session){
+
         /*
             do something for onOpen
             与当前客户端连接成功时
@@ -101,6 +136,8 @@ public class WebSocket {
         this.session = session;
         ObjectMapper objectMapper = new ObjectMapper();
         SocketMsgVo socketMsgVo;
+        SocketMsgServiceImpl socketMsgServiceImpl;
+
         try{
             socketMsgVo = objectMapper.readValue(message, SocketMsgVo.class);
             Channel channel = RabbitUtil.getChannel();
@@ -111,18 +148,56 @@ public class WebSocket {
                     socketMsgVo.getQueueName(),
                     socketMsgVo.getRoutingKey());
             this.socketMsgVo = socketMsgVo;
+
             // RabbitMQ收到消息的回调接口
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message2 = new String(delivery.getBody(), "UTF-8");
                 System.out.println(" 接收绑定键 :" + delivery.getEnvelope().getRoutingKey() + ", 消息:" + message2);
-                this.socketMsgVo.setTime(analysis.cutmsg(message2));
-                String news =analysis.getNews();
-                String[] bitmap = analysis.hexToIntarray(news);
-                this.socketMsgVo.setEquipmentId(analysis.getEquipmentId(news));
-                this.socketMsgVo.setStatus(analysis.descriptionStatus(bitmap));
-                this.socketMsgVo.setStatus_value(bitmap);
 
-                this.session.getAsyncRemote().sendObject(this.socketMsgVo);
+                //当前时间
+                this.socketMsgVo.setTime(analysis.cutmsg(message2));
+                //切割时间戳之后的消息
+                String news =analysis.getNews();
+                //解析消息后的位图
+                String[] bitmap = analysis.hexToIntarray(news);
+                //解析消息后的设备ID
+                this.socketMsgVo.setEquipmentId(analysis.getEquipmentId(news));
+                //解析消息后的设备状态状况
+                this.socketMsgVo.setStatus(analysis.descriptionStatus(bitmap));
+                //解析消息后的设备状态值
+                this.socketMsgVo.setStatus_value(bitmap);
+                if(socketMsgVos[0] == null){
+                    //浅拷贝对象
+                    socketMsgVos[0] =(SocketMsgVo)this.socketMsgVo.clone();
+                    socketMsgVos[1] =(SocketMsgVo)this.socketMsgVo.clone();
+                }else {
+                    //记录先前状态值
+                    this.socketMsgVo.setStatus_value2(socketMsgVos[0].getStatus_value());
+                    //记录先前时间
+                    this.socketMsgVo.setTime2(socketMsgVos[0].getTime());
+                    //记录先前状况
+                    this.socketMsgVo.setStatus2(socketMsgVos[0].getStatus());
+                    //记录改变原因
+                    this.socketMsgVo.setCause(analysis.statusChange(socketMsgVos[0].getStatus_value(),this.socketMsgVo.getStatus_value()));
+
+                    socketMsgVos[1] =(SocketMsgVo)socketMsgVos[0].clone();
+                    socketMsgVos[0] =(SocketMsgVo)this.socketMsgVo.clone();
+                }
+                SocketMsg socketMsg = new SocketMsg();
+                socketMsg.setExchangName(socketMsgVos[0].getExchangName());
+                socketMsg.setRoutingKey(socketMsgVos[0].getRoutingKey());
+                socketMsg.setQueueName(socketMsgVos[0].getQueueName());
+                socketMsg.setEquipmentId(socketMsgVos[0].getEquipmentId());
+                String str = (Arrays.toString(socketMsgVos[0].getStatus_value()));
+                socketMsg.setStatus_value(str);
+                socketMsg.setTime(socketMsgVos[0].getTime());
+                socketMsg.setStatus(socketMsgVos[0].getStatus());
+                socketMsg.setCause(socketMsgVos[0].getCause());
+
+                int flag = saveMessage(socketMsg);
+                System.out.println(flag);
+
+                this.session.getAsyncRemote().sendObject(socketMsgVos[0]);
 
                 System.out.println("接收数据并发送至前端。");
 
