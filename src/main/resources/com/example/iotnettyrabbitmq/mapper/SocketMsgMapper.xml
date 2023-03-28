@@ -20,5 +20,9 @@
         values (#{exchangName},#{routingKey},#{queueName},#{equipmentId},#{status_value},#{time},#{status},#{cause});
     </insert>
 
+    <select id="searchMessage" parameterType="com.example.iotnettyrabbitmq.pojo.SocketMsg" resultMap="SocketMsg">
+        select equipment_id, status_value, time, status, cause from equipment;
+    </select>
+
 
 </mapper>

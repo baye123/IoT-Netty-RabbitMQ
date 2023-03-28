@@ -20,14 +20,23 @@ import java.util.Map;
 public class ClientHandler extends SimpleChannelInboundHandler<String> {
     public ChannelHandlerContext channelHandlerContext;
     //rabbitmq交换机名称
-    private static final String EXCHANGE_NAME = "direct_IoT";
+    private String EXCHANGE_NAME = "direct_IoT";
 
-    private static final String RoutingKey = "equipment-1";
+    private String RoutingKey = "equipment-1";
     //创建多个 bindingKey
     Map<String, String> bindingKeyMap = new HashMap<>();
 
     public Channel channel;
 
+    ClientHandler(){
+        EXCHANGE_NAME = "direct_IoT";
+
+        RoutingKey = "equipment-1";
+    }
+    ClientHandler(String exchangeName,String routingKey){
+        EXCHANGE_NAME = exchangeName;
+        RoutingKey = routingKey;
+    }
 
 
 

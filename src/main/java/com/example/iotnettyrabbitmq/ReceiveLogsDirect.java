@@ -20,7 +20,7 @@ public class ReceiveLogsDirect {
         String userId = "1";
         String DO_1open = "000100000006FF050064FF00";
         String DO_1close = "000100000006FF0500640000";
-        NettyClient nettyClient = new NettyClient();
+        NettyClient nettyClient = new NettyClient(EXCHANGE_NAME,"equipment-1");
         nettyClient.initNetty(userId, "169.254.152.78", 502);
         PosttingObject posttingObject = NettyClient.concurrentHashMap.get(userId);
         try {

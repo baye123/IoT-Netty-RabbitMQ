@@ -29,6 +29,9 @@ public class NettyController {
         nettyServer.initNetty("1",host,port1);
     }
 
+
+
+
     @RequestMapping("/index")
     public String index(){
         return "index";

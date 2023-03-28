@@ -25,8 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NettyClient {
     /** 存储用户id和netty连接关系 */
     public static ConcurrentHashMap<String, PosttingObject> concurrentHashMap = new ConcurrentHashMap();
-    public ClientHandler clientHandler = new ClientHandler();
+    public ClientHandler clientHandler;
 
+
+    public NettyClient(String exchangName,String routingKey){
+        this.clientHandler = new ClientHandler(exchangName,routingKey);
+    }
     public void initNetty(String userId, String host, int port){
         //创建nioEventLoopGroup
         NioEventLoopGroup group = new NioEventLoopGroup();

@@ -63,74 +63,94 @@
         })
         conectWebSocket();
         return false;  //阻止表单默认提交
-
     }
+   var socketList ={
+            type: "get",
+            url: "/Websocket/list",
+            dataType:'json',
+            success: function(list){
+                data = JSON.parse(list);
+                setTimeout(function (){$.ajax(socketList);},3000);//3秒定时发送请求
+            }
+    };
+    //与列对应的数据; 属性名对应上面的field
+    var data = [
+        {
+            equipmentId: 'FF',
+            status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+            time: '',
+            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
+            time2: '',
+            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
+            cause:'DI-6通道闭合了  DI-7通道闭合了',
+            sadas:''
+        },
+    ];
+    var ssc =function () {
+        $.ajax({
+            url: "/Websocket/list",
+            type: "get",
+            dataType: 'json',
+            success: function (list) {
+                // data = JSON.parse(list);
+                // console.log(list)
+                var arr = [];
+                for(var i in list){
+                    arr.push(list[i]);
+                }
+                // for(var i in arr){
+                //     data[i].equipmentId = arr[i].equipmentId;
+                //     data[i].status_value =arr[i].status_value;
+                //     data[i].time = arr[i].time;
+                //     data[i].status = arr[i].status;
+                //     // data[i].status_value2 = arr[i].status_value2;
+                //     // data[i].time2 = arr[i].time2;
+                //     // data[i].status2 = arr[i].status2;
+                //     data[i].cause = arr[i].cause;
+                // }
+                data =arr;
+                console.log(data);
+
+                gridOptions.api.setRowData (data);
+            },
+
+        });
+        return ssc;
+    }
+    setInterval(ssc(),5000);
 
     //定义表格列
     var columnDefs = [
-        { headerName: '设备ID', field: 'id','pinned': 'left',width:120 },
-        { headerName: '当前状态值', field: 'status_value1' },
-        { headerName: '时间1', field: 'time1' },
-        { headerName: 'DI通道状况', field: 'status1' },
+        { headerName: '设备ID', field: 'equipmentId','pinned': 'left',width:120 },
+        { headerName: '当前状态值', field: 'status_value' },
+        { headerName: '时间1', field: 'time' },
+        { headerName: 'DI通道状况', field: 'status' },
         { headerName: '先前状态值', field: 'status_value2' },
         { headerName: '时间2', field: 'time2' },
         { headerName: '先前DI通道状况', field: 'status2' },
         { headerName: '变化原因', field: 'cause' },
     ];
 
-    //与列对应的数据; 属性名对应上面的field
-    var data = [
-        {
-            id: 'FF',
-            status_value1: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time1: '',
-            status1: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了'
-        },
-        {
-            id: 'FF',
-            status_value1: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time1: '',
-            status1: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了'
-        },
-        {
-            id: 'FF',
-            status_value1: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time1: '',
-            status1: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了'
-        },
 
-
-    ];
 
     //顶部合计行
     var topRows=[
         {
-            id: 'FF',
-            status_value1: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time1: '',
-            status1: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+            equipmentId: 'FF',
+            status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+            time: null,
+            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
             status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
             time2: '',
             status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
             cause:'DI-6通道闭合了  DI-7通道闭合了'
         },
         {
-            id: '01',
-            status_value1: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time1: '',
-            status1: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+            equipmentId: '01',
+            status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+            time: '1',
+            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
             status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
             time2: '',
             status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
@@ -188,19 +208,20 @@
 
     //更新顶部行选中数据
     function reset() {
-        topRows[0].id = 'ff1';
-        topRows[0].status_value1 ='[1, 1, 1, 0, 0, 0, 0, 0]';
-        topRows[0].time1 = '2023-3-23';
-        topRows[0].status1 = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
+        topRows[0].equipmentId = 'ff1';
+        topRows[0].status_value ='[1, 1, 1, 0, 0, 0, 0, 0]';
+        topRows[0].time = '2023-3-23';
+        topRows[0].status = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
         topRows[0].status_value2 = '[0, 0, 0, 0, 0, 0, 0, 0]';
         topRows[0].time2 = '2023-3-24';
         topRows[0].status2 = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
         topRows[0].cause = 'DI-6通道闭合了  DI-7通道闭合了';
-        var params = {
-            force: true
-        };
-        gridOptions.api.refreshCells(params);
-
+        data[0].equipmentId = '1213214';
+        // var params = {
+        //     force: true
+        // };
+        // gridOptions.api.refreshCells(params);
+        gridOptions.api.setRowData (topRows);
     }
     function testdata(){
         var data2 = '{"exchangName":"direct_IoT","routingKey":"equipment-1","queueName":"console-1","equipmentId":"FF","status_value":["0","0","0","0","0","0","0","0"],"time":"2023-03-23 16:30:25","status":"当前状态为DI-1通道: 断开 DI-2通道: 断开 DI-3通道: 断开 DI-4通道: 断开 DI-5通道: 断开 DI-6通道: 断开 DI-7通道: 断开 DI-8通道: 断开 ","status_value2":null,"time2":null,"status2":null,"cause":null}';
@@ -230,13 +251,14 @@
         //接收到消息的回调方法
         websocket.onmessage = function(event) {
             // alert(event.data);
-            document.getElementById('message').innerHTML += event.data + '<br/>';
+            // document.getElementById('message').innerHTML += event.data + '<br/>';
             var socketMsg = event.data;
             var json = JSON.parse(socketMsg);
-            topRows[0].id = json.equipmentId;
-            topRows[0].status_value1 =json.status_value;
-            topRows[0].time1 = json.time;
-            topRows[0].status1 = json.status;
+            // 写死的位置，位置一对一一个设备
+            topRows[0].equipmentId = json.equipmentId;
+            topRows[0].status_value =json.status_value;
+            topRows[0].time = json.time;
+            topRows[0].status = json.status;
             topRows[0].status_value2 = json.status_value2;
             topRows[0].time2 = json.time2;
             topRows[0].status2 = json.status2;

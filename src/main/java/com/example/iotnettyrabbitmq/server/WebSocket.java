@@ -167,6 +167,7 @@ public class WebSocket {
                 //解析消息后的设备状态值
                 this.socketMsgVo.setStatus_value(bitmap);
                 if(socketMsgVos[0] == null){
+                    this.socketMsgVo.setCause("初次启动/重新启动");
                     //浅拷贝对象
                     socketMsgVos[0] =(SocketMsgVo)this.socketMsgVo.clone();
                     socketMsgVos[1] =(SocketMsgVo)this.socketMsgVo.clone();

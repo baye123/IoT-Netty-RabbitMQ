@@ -6,6 +6,8 @@ import com.example.iotnettyrabbitmq.service.SocketMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @Author : baye
  * @Date : 2023/3/24 9:43
@@ -20,9 +22,11 @@ public class SocketMsgServiceImpl implements SocketMsgService {
 
     @Override
     public int saveMessage(SocketMsg socketMsg){
-
         return socketMsgMapper.saveMessage(socketMsg);
-
+    }
+    @Override
+    public List<SocketMsg> searchMessage(){
+        return socketMsgMapper.searchMessage();
     }
 
 }

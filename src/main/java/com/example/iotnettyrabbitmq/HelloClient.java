@@ -14,7 +14,7 @@ public class HelloClient {
         String userId = "1";
         String DO_1open = "000100000006FF050064FF00";
         String DO_1close = "000100000006FF0500640000";
-        new NettyClient().initNetty(userId, "169.254.152.78", 502);
+        new NettyClient("direct_IoT","equipment-1").initNetty(userId, "169.254.152.78", 502);
         PosttingObject posttingObject = NettyClient.concurrentHashMap.get(userId);
         try{
             // 发送消息
