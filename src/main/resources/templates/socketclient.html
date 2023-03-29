@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+  <meta charset="UTF-8">
+  <title>IoT模块数据采集-服务器模式</title>
+  <script src="https://www.itxst.com/package/ag-grid/ag-grid-community.js"></script>
+  <link href="https://www.itxst.com/package/ag-grid/styles/ag-grid.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="socket2" id="socket2">
+  <strong>开启Netty客户端</strong>
+  <form action="" name="client" method="post" onsubmit="return socketAjax(this)" >
+    服务器IP地址： <input type="text" name="clientIp"  value="169.254.152.78">
+    <br/>
+    访问端口：<input type="number" name="port" value="502">
+    <br/>
+    交换器： <input type="text" name="exchangName" value="direct_IoT">
+    <br/>
+    路由键： <input type="text" name="routingKey" value="equipment-1">
+    <br/>
+    队列名： <input type="text" name="queueName" value="console-1"><br/>
+    <button type="submit"  >连接网络</button>
+  </form>
+  <input type="button" value="建立websocket连接" onclick="conectWebSocket()" />
+  <input type="button" value="websocket请求队列数据" onclick="send()" />
+  <input type="button" value="更新第一行数据" onclick="reset()" />
+  <input type="button" value="测试数据" onclick="testdata()" />
+</div>
+
+<div id="myGrid" style="width: 100%;height: 500px;"  class="ag-theme-balham"></div>
+
+<div id="message"></div>
+</body>
+<script src='https://code.jquery.com/jquery-3.6.4.js'></script>
+<script>
+  var formData2;
+  var clientIp;
+  var port2;
+  var exchangName2;
+  var routingKey2;
+  var queueName2;
+
+  //获取表单数据，建立Netty客户端，接收数据并发送到消息队列
+  function socketAjax(form){
+    formData2 = new FormData(form);
+    clientIp = formData2.get('clientIp');
+    port2 = formData2.get('port');
+    exchangName2 = formData2.get('exchangName');
+    routingKey2 = formData2.get('routingKey');
+    queueName2 = formData2.get('queueName');
+
+    //ajax获取表单数据异步处理Netty-Rabbit服务器搭建方式
+    $.ajax({
+      type: "post",
+      url: "/Netty/client",
+      data:{
+        "clientIp": clientIp,
+        "port": port2,
+        "exchangName": exchangName2,
+        "routingKey": routingKey2
+      },
+      success: function(data){
+        console.log("111");
+      }
+    })
+
+    // conectWebSocket();
+    return false;  //阻止表单默认提交
+  }
+  $("#client").submit(function (e){
+    e.preventDefault()
+  });
+
+  var socketList ={
+    type: "get",
+    url: "/Websocket/list",
+    dataType:'json',
+    success: function(list){
+      data = JSON.parse(list);
+      setTimeout(function (){$.ajax(socketList);},3000);//3秒定时发送请求
+    }
+  };
+  //与列对应的数据; 属性名对应上面的field
+  var data = [
+    {
+      equipmentId: 'FF',
+      status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+      time: '',
+      status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+      status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
+      time2: '',
+      status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
+      cause:'DI-6通道闭合了  DI-7通道闭合了',
+      sadas:''
+    },
+  ];
+  var ssc =function () {
+    $.ajax({
+      url: "/Websocket/list",
+      type: "get",
+      dataType: 'json',
+      success: function (list) {
+        // data = JSON.parse(list);
+        // console.log(list)
+        var arr = [];
+        for(var i in list){
+          arr.push(list[i]);
+        }
+        // for(var i in arr){
+        //     data[i].equipmentId = arr[i].equipmentId;
+        //     data[i].status_value =arr[i].status_value;
+        //     data[i].time = arr[i].time;
+        //     data[i].status = arr[i].status;
+        //     // data[i].status_value2 = arr[i].status_value2;
+        //     // data[i].time2 = arr[i].time2;
+        //     // data[i].status2 = arr[i].status2;
+        //     data[i].cause = arr[i].cause;
+        // }
+        data =arr;
+        console.log(data);
+
+        gridOptions.api.setRowData (data);
+      },
+
+    });
+    return ssc;
+  }
+  setInterval(ssc(),5000);
+
+  //定义表格列
+  var columnDefs = [
+    { headerName: '设备ID', field: 'equipmentId','pinned': 'left',width:120 },
+    { headerName: '当前状态值', field: 'status_value' },
+    { headerName: '时间1', field: 'time' },
+    { headerName: 'DI通道状况', field: 'status' },
+    { headerName: '先前状态值', field: 'status_value2' },
+    { headerName: '时间2', field: 'time2' },
+    { headerName: '先前DI通道状况', field: 'status2' },
+    { headerName: '变化原因', field: 'cause' },
+  ];
+
+
+
+  //顶部合计行
+  var topRows=[
+    {
+      equipmentId: 'FF',
+      status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+      time: null,
+      status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+      status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
+      time2: '',
+      status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
+      cause:'DI-6通道闭合了  DI-7通道闭合了'
+    },
+    {
+      equipmentId: '01',
+      status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
+      time: '1',
+      status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
+      status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
+      time2: '',
+      status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
+      cause:'DI-6通道闭合了  DI-7通道闭合了'
+    },
+
+  ];
+
+  //底部合计行
+  var botRows=[
+    { name: '置顶行1', sex: 'X', age: '15', 'jg': '中国', 'sf': '顶部1', 'dz': '杭州市文一西路' }
+
+  ];
+
+  //将列和数据赋给gridOptions
+  var gridOptions = {
+    rowHeight :30, //设置行高为30px,默认情况下是25px
+    // floatingFilter: true, //设置为true直接显示刷选器，如果为false 需要点击列头
+    columnDefs: columnDefs,
+    rowSelection: 'multiple', //设置多行选中 single 表示只能选中一行
+    rowMultiSelectWithClick:true,
+    rowDeselection:true,
+    rowData: data,
+
+    onGridReady: function () {
+      //表格创建完成后执行的事件
+      gridOptions.api.sizeColumnsToFit();//调整表格大小自适应
+    },
+    defaultColDef: {
+      editable: true,//单元表格是否可编辑
+      enableRowGroup: true,
+      enablePivot: true,
+      enableValue: true,
+      sortable: true, //开启排序
+      resizable: true,//是否可以调整列大小，就是拖动改变列大小
+      filter: true  //开启刷选
+    },
+    pagination: true,  //开启分页（前端分页）
+    paginationAutoPageSize: true, //根据网页高度自动分页（前端分页）
+    pinnedTopRowData:topRows, //顶部合计行
+    pinnedBottomRowData:botRows ,//底部合计行
+    //**************设置置顶行样式**********
+    getRowStyle: function (params) {
+      if (params.node.rowPinned) {
+        return {'font-weight': 'bold','color':'red'};
+      }
+    },
+  };
+
+  //在dom加载完成后 初始化agGrid完成
+  document.addEventListener("DOMContentLoaded", function () {
+    var eGridDiv = document.querySelector('#myGrid');
+    new agGrid.Grid(eGridDiv, gridOptions);
+  });
+
+  //更新顶部行选中数据
+  function reset() {
+    topRows[0].equipmentId = 'ff1';
+    topRows[0].status_value ='[1, 1, 1, 0, 0, 0, 0, 0]';
+    topRows[0].time = '2023-3-23';
+    topRows[0].status = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
+    topRows[0].status_value2 = '[0, 0, 0, 0, 0, 0, 0, 0]';
+    topRows[0].time2 = '2023-3-24';
+    topRows[0].status2 = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
+    topRows[0].cause = 'DI-6通道闭合了  DI-7通道闭合了';
+    data[0].equipmentId = '1213214';
+    // var params = {
+    //     force: true
+    // };
+    // gridOptions.api.refreshCells(params);
+    gridOptions.api.setRowData (topRows);
+  }
+  function testdata(){
+    var data2 = '{"exchangName":"direct_IoT","routingKey":"equipment-1","queueName":"console-1","equipmentId":"FF","status_value":["0","0","0","0","0","0","0","0"],"time":"2023-03-23 16:30:25","status":"当前状态为DI-1通道: 断开 DI-2通道: 断开 DI-3通道: 断开 DI-4通道: 断开 DI-5通道: 断开 DI-6通道: 断开 DI-7通道: 断开 DI-8通道: 断开 ","status_value2":null,"time2":null,"status2":null,"cause":null}';
+    var json = JSON.parse(data2);
+    alert(json.exchangName);
+  }
+
+</script>
+
+<script type="text/javascript">
+  var websocket = null;
+  function conectWebSocket(){
+    //判断当前浏览器是否支持WebSocket
+    if ('WebSocket'in window) {
+      websocket = new WebSocket("ws://localhost:8090/websocket/web");
+    } else {
+      alert('Not support websocket');
+    }
+    //连接发生错误的回调方法
+    websocket.onerror = function() {
+      alert('连接发生错误');
+    };
+    //连接成功建立的回调方法
+    websocket.onopen = function(event) {
+      alert("Loc MSG: 成功建立连接");
+    }
+    //接收到消息的回调方法
+    websocket.onmessage = function(event) {
+      // alert(event.data);
+      // document.getElementById('message').innerHTML += event.data + '<br/>';
+      var socketMsg = event.data;
+      var json = JSON.parse(socketMsg);
+      // 写死的位置，位置一对一一个设备
+      topRows[0].equipmentId = json.equipmentId;
+      topRows[0].status_value =json.status_value;
+      topRows[0].time = json.time;
+      topRows[0].status = json.status;
+      topRows[0].status_value2 = json.status_value2;
+      topRows[0].time2 = json.time2;
+      topRows[0].status2 = json.status2;
+      topRows[0].cause = json.cause;
+      var params = {
+        force: true
+      };
+      gridOptions.api.refreshCells(params);
+      // setMessageInnerHTML(event.data);
+    }
+    //连接关闭的回调方法
+    websocket.onclose = function() {
+      // setMessageInnerHTML("Loc MSG:关闭连接");
+      alert('关闭连接');
+    }
+    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = function() {
+      websocket.close();
+    }
+  }
+  //发送消息，websocket接收队列消息
+  function send(){
+    var socketMsg =
+            {
+              exchangName:exchangName2,
+              queueName:queueName2,
+              routingKey:routingKey2
+            };
+    websocket.send(JSON.stringify(socketMsg));
+  }
+
+
+</script>
+<style>
+
+  div.socket2{
+    width: 500px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: cornflowerblue;
+
+  }
+</style>
+</html>

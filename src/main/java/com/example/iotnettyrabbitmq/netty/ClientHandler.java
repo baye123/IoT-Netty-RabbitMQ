@@ -28,14 +28,18 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
 
     public Channel channel;
 
+    private NettyClient nettyClient;
+
     ClientHandler(){
         EXCHANGE_NAME = "direct_IoT";
 
         RoutingKey = "equipment-1";
     }
-    ClientHandler(String exchangeName,String routingKey){
+    ClientHandler(String exchangeName,String routingKey,NettyClient nettyClient){
         EXCHANGE_NAME = exchangeName;
         RoutingKey = routingKey;
+        this.nettyClient = nettyClient;
+
     }
 
 
@@ -49,6 +53,17 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
         //channelHandlerContext.writeAndFlush("11111");
         //channelHandlerContext.channel().close();
     }
+
+    /**
+     *
+     * 通道不活跃时调用
+     */
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.err.println("运行中断开重连。。。");
+        nettyClient.connect();
+    }
+
 
     /**
      * 读取消息
