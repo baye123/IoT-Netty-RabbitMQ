@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>IoT模块数据采集</title>
-    <script src="https://www.itxst.com/package/ag-grid/ag-grid-community.js"></script>
-    <link href="https://www.itxst.com/package/ag-grid/styles/ag-grid.css" rel="stylesheet"/>
+<!--    <script src="https://www.itxst.com/package/ag-grid/ag-grid-community.js"></script>-->
+    <script src="/static/js/ag-grid-community.js" th:src="@{/static/js/ag-grid-community.js}"></script>
+<!--    <link href="https://www.itxst.com/package/ag-grid/styles/ag-grid.css" rel="stylesheet"/>-->
+    <link href="/static/css/ag-grid.css" rel="stylesheet" th:href="@{/static/css/ag-grid.css}"/>
+
 </head>
 <body>
 <div class="socket" id="socket">
-    <strong>开启Netty服务器</strong>
+    <strong>连接RabbitMQ消息队列</strong>
     <form action="" method="post" onsubmit="return socketAjax(this)" >
-    IP地址： <input type="text" name="host"  value="169.254.152.77">
-    <br/>
-    访问端口：<input type="number" name="port" value="9999">
-    <br/>
     交换器： <input type="text" name="exchangName" value="direct_IoT">
     <br/>
-    路由键： <input type="text" name="routingKey" value="equipment-1">
+    路由键： <input type="text" name="routingKey" value="169.254.152.78">
     <br/>
-    队列名： <input type="text" name="queueName" value="console-1"><br/>
-    <button type="submit"  >连接网络</button>
+    队列名： <input type="text" name="queueName" value="169.254.152.78"><br/>
+    <button type="submit"  >保存信息</button>
     </form>
+    <input type="button" value="建立websocket连接" onclick="conectWebSocket()" />
     <input type="button" value="websocket请求队列数据" onclick="send()" />
-    <input type="button" value="更新第一行数据" onclick="reset()" />
-    <input type="button" value="测试数据" onclick="testdata()" />
+<!--    <input type="button" value="更新第一行数据" onclick="reset()" />-->
+    <input type="button" value="测试数据" onclick="ssc()" />
 </div>
 
 <!--<button type="button" onclick="conectWebSocket()">连接websocket</button>-->
@@ -33,11 +33,11 @@
 
 <div id="message"></div>
 </body>
-<script src='https://code.jquery.com/jquery-3.6.4.js'></script>
+<script src='/static/js/jquery-3.6.4.js'></script>
 <script>
     var formData;
-    var host;
-    var port;
+    // var host;
+    // var port;
     var exchangName;
     var routingKey;
     var queueName;
@@ -45,27 +45,27 @@
     //获取表单数据，建立Netty服务器，接收数据并发送到消息队列
     function socketAjax(form){
         formData = new FormData(form);
-        host = formData.get('host');
-        port = formData.get('port');
+        // host = formData.get('host');
+        // port = formData.get('port');
         exchangName = formData.get('exchangName');
         routingKey = formData.get('routingKey');
         queueName = formData.get('queueName');
 
-        //ajax获取表单数据异步处理Netty-Rabbit服务器搭建方式
-        $.ajax({
-            type: "post",
-            url: "/Netty/server",
-            data:{
-                "host": host,
-                "port": port,
-                "exchangName": exchangName,
-                "routingKey": routingKey
-            },
-            success: function(data){
-
-            }
-        })
-
+        alert("保存信息成功！")
+        // ajax获取表单数据异步处理Netty-Rabbit服务器搭建方式
+        // $.ajax({
+        //     type: "post",
+        //     url: "/Netty/server",
+        //     data:{
+        //         "host": host,
+        //         "port": port,
+        //         "exchangName": exchangName,
+        //         "routingKey": routingKey
+        //     },
+        //     success: function(data){
+        //
+        //     }
+        // })
         return false;  //阻止表单默认提交
     }
 
@@ -82,6 +82,7 @@
     var data = [
         {
             equipmentId: 'FF',
+            light:'无',
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
             time: '',
             status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
@@ -123,18 +124,25 @@
         });
         return ssc;
     }
-    setInterval(ssc(),5000);
+    //轮询
+    // setInterval(ssc(),5000);
 
     //定义表格列
     var columnDefs = [
         { headerName: '设备ID', field: 'equipmentId','pinned': 'left',width:120 },
+        { headerName: '安灯状态', field: 'light' },
         { headerName: '当前状态值', field: 'status_value' },
-        { headerName: '时间1', field: 'time' },
-        { headerName: 'DI通道状况', field: 'status' },
-        { headerName: '先前状态值', field: 'status_value2' },
-        { headerName: '时间2', field: 'time2' },
-        { headerName: '先前DI通道状况', field: 'status2' },
-        { headerName: '变化原因', field: 'cause' },
+        { headerName: '时间', field: 'time' },
+        { headerName: 'DI-1', field: 'DI_1', width: 80 },
+        { headerName: 'DI-2', field: 'DI_2', width: 80 },
+        { headerName: 'DI-3', field: 'DI_3', width: 80  },
+        { headerName: 'DI-4', field: 'DI_4', width: 80  },
+        { headerName: 'DI-5', field: 'DI_5', width: 80  },
+        { headerName: 'DI-6', field: 'DI_6', width: 80  },
+        { headerName: 'DI-7', field: 'DI_7', width: 80  },
+        { headerName: 'DI-8', field: 'DI_8', width: 80  },
+        { headerName: 'original_information', field: 'original_information' },
+
     ];
 
 
@@ -145,21 +153,32 @@
             equipmentId: 'FF',
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
             time: null,
-            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了'
+            light:'无',
+            DI_1:'1',
+            DI_2:'1',
+            DI_3:'1',
+            DI_4:'1',
+            DI_5:'1',
+            DI_6:'1',
+            DI_7:'1',
+            DI_8:'1',
+            original_information: '123123123'
+
         },
         {
-            equipmentId: '01',
+            equipmentId: '12',
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time: '1',
-            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了'
+            time: null,
+            light:'无',
+            DI_1:'1',
+            DI_2:'1',
+            DI_3:'1',
+            DI_4:'1',
+            DI_5:'1',
+            DI_6:'1',
+            DI_7:'1',
+            DI_8:'1',
+            original_information: '123123123'
         },
 
     ];
@@ -211,28 +230,6 @@
         new agGrid.Grid(eGridDiv, gridOptions);
     });
 
-    //更新顶部行选中数据
-    function reset() {
-        topRows[0].equipmentId = 'ff1';
-        topRows[0].status_value ='[1, 1, 1, 0, 0, 0, 0, 0]';
-        topRows[0].time = '2023-3-23';
-        topRows[0].status = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
-        topRows[0].status_value2 = '[0, 0, 0, 0, 0, 0, 0, 0]';
-        topRows[0].time2 = '2023-3-24';
-        topRows[0].status2 = 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开';
-        topRows[0].cause = 'DI-6通道闭合了  DI-7通道闭合了';
-        data[0].equipmentId = '1213214';
-        // var params = {
-        //     force: true
-        // };
-        // gridOptions.api.refreshCells(params);
-        gridOptions.api.setRowData (topRows);
-    }
-    function testdata(){
-        var data2 = '{"exchangName":"direct_IoT","routingKey":"equipment-1","queueName":"console-1","equipmentId":"FF","status_value":["0","0","0","0","0","0","0","0"],"time":"2023-03-23 16:30:25","status":"当前状态为DI-1通道: 断开 DI-2通道: 断开 DI-3通道: 断开 DI-4通道: 断开 DI-5通道: 断开 DI-6通道: 断开 DI-7通道: 断开 DI-8通道: 断开 ","status_value2":null,"time2":null,"status2":null,"cause":null}';
-        var json = JSON.parse(data2);
-        alert(json.exchangName);
-    }
 
 </script>
 
@@ -258,16 +255,29 @@
             // alert(event.data);
             // document.getElementById('message').innerHTML += event.data + '<br/>';
             var socketMsg = event.data;
+            console.log("111");
             var json = JSON.parse(socketMsg);
+            console.log(json);
             // 写死的位置，位置一对一一个设备
             topRows[0].equipmentId = json.equipmentId;
             topRows[0].status_value =json.status_value;
             topRows[0].time = json.time;
-            topRows[0].status = json.status;
-            topRows[0].status_value2 = json.status_value2;
-            topRows[0].time2 = json.time2;
-            topRows[0].status2 = json.status2;
-            topRows[0].cause = json.cause;
+            // topRows[0].status = json.status;
+            // topRows[0].status_value2 = json.status_value2;
+            // topRows[0].time2 = json.time2;
+            // topRows[0].status2 = json.status2;
+            // topRows[0].cause = json.cause;
+            topRows[0].light = json.light;
+            //序列转化，全大写默认改为小写 DI_1——》di_1
+            topRows[0].DI_1 = json.di_1;
+            topRows[0].DI_2 = json.di_2;
+            topRows[0].DI_3 = json.di_3;
+            topRows[0].DI_4 = json.di_4;
+            topRows[0].DI_5 = json.di_5;
+            topRows[0].DI_6 = json.di_6;
+            topRows[0].DI_7 = json.di_7;
+            topRows[0].DI_8 = json.di_8;
+            topRows[0].original_information = json.original_information;
             var params = {
                 force: true
             };
@@ -275,7 +285,9 @@
             // setMessageInnerHTML(event.data);
         }
         //连接关闭的回调方法
-        websocket.onclose = function() {
+        websocket.onclose = function(e) {
+            console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean)
+            console.log(e)
             // setMessageInnerHTML("Loc MSG:关闭连接");
             alert('关闭连接');
         }
@@ -292,7 +304,7 @@
                 queueName:queueName,
                 routingKey:routingKey
         };
-        conectWebSocket();
+
         websocket.send(JSON.stringify(socketMsg));
     }
 
@@ -306,14 +318,6 @@
         border-color: cornflowerblue;
         display: inline-block;
 
-    }
-    div.socket2{
-        width: 500px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: cornflowerblue;
-        float: right;
-        /*position:absolute;*/
     }
 </style>
 </html>

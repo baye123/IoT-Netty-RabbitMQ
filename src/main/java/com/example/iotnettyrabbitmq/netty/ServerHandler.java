@@ -34,6 +34,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     public ChannelHandlerContext channelHandlerContext;
 
+    //保存客户端传来的IP地址
     public static Map<String,ChannelHandlerContext> mapC = new HashMap<>();
     //创建多个 bindingKey
     public Map<String, String> bindingKeyMap = new HashMap<>();
@@ -82,7 +83,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         channelHandlerContext = ctx;
         mapC.put((((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress()),ctx);
-        System.out.println("你好" + ctx);
+        System.out.println("你好" + (((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress()));
     }
 
 

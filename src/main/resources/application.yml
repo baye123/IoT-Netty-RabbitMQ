@@ -11,6 +11,12 @@ spring:
     username: root
     password: 123456
 
+  mvc:
+    static-path-pattern: /static/**
+  thymeleaf:
+#    禁用模板缓存
+    cache: false
+
 #起别名，mapper路径，驼峰命名规则
 mybatis:
   type-aliases-package: com.example.iotnettyrabbitmq.pojo

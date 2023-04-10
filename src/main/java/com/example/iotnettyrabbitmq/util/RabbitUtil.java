@@ -39,7 +39,7 @@ public class RabbitUtil {
     public void channelReceive(Channel channel,String exchangName,String queueName,String routingKey) throws Exception{
         //声明交换模式
         channel.exchangeDeclare(exchangName, BuiltinExchangeType.DIRECT);
-//        channel.queueDeclare(param 1, param2, param3, param4, param5)
+        channel.queueDeclare(queueName, true, false, false,null);
 //        生成一个队列
 //        1.队列名称
 //        2.队列里面的消息是否持久化 默认消息存储在内存中

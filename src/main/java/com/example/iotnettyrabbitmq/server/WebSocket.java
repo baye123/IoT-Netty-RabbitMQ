@@ -139,7 +139,9 @@ public class WebSocket {
         SocketMsgServiceImpl socketMsgServiceImpl;
 
         try{
+            //前端收到的数组字符串转化为实体类对象
             socketMsgVo = objectMapper.readValue(message, SocketMsgVo.class);
+            //消费消RabbitMQ队列中的消息
             Channel channel = RabbitUtil.getChannel();
             RabbitUtil rabbitUtil = new RabbitUtil();
             rabbitUtil.channelReceive(
@@ -148,6 +150,7 @@ public class WebSocket {
                     socketMsgVo.getQueueName(),
                     socketMsgVo.getRoutingKey());
             this.socketMsgVo = socketMsgVo;
+            System.out.println("绑定成功？");
 
             // RabbitMQ收到消息的回调接口
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -158,28 +161,44 @@ public class WebSocket {
                 this.socketMsgVo.setTime(analysis.cutmsg(message2));
                 //切割时间戳之后的消息
                 String news =analysis.getNews();
+                this.socketMsgVo.setOriginal_information(news);
                 //解析消息后的位图
                 String[] bitmap = analysis.hexToIntarray(news);
                 //解析消息后的设备ID
-                this.socketMsgVo.setEquipmentId(analysis.getEquipmentId(news));
+                String ID = analysis.getEquipmentId(news);
+                this.socketMsgVo.setEquipmentId(ID);
+                //解析消息后的设备表名
+                String table = "equipment_" + ID.toLowerCase();
+                this.socketMsgVo.setTable(table);
                 //解析消息后的设备状态状况
-                this.socketMsgVo.setStatus(analysis.descriptionStatus(bitmap));
+//                this.socketMsgVo.setStatus(analysis.descriptionStatus(bitmap));
                 //解析消息后的设备状态值
                 this.socketMsgVo.setStatus_value(bitmap);
+                //解析消息后的设备安灯状态值
+                this.socketMsgVo.setLight(analysis.lightStatus(bitmap));
+                //解析消息后的设备各DI通道单独情况
+                this.socketMsgVo.setDI_1(bitmap[7]);
+                this.socketMsgVo.setDI_2(bitmap[6]);
+                this.socketMsgVo.setDI_3(bitmap[5]);
+                this.socketMsgVo.setDI_4(bitmap[4]);
+                this.socketMsgVo.setDI_5(bitmap[3]);
+                this.socketMsgVo.setDI_6(bitmap[2]);
+                this.socketMsgVo.setDI_7(bitmap[1]);
+                this.socketMsgVo.setDI_8(bitmap[0]);
                 if(socketMsgVos[0] == null){
-                    this.socketMsgVo.setCause("初次启动/重新启动");
+//                    this.socketMsgVo.setCause("初次启动/重新启动");
                     //浅拷贝对象
                     socketMsgVos[0] =(SocketMsgVo)this.socketMsgVo.clone();
                     socketMsgVos[1] =(SocketMsgVo)this.socketMsgVo.clone();
                 }else {
                     //记录先前状态值
-                    this.socketMsgVo.setStatus_value2(socketMsgVos[0].getStatus_value());
+//                    this.socketMsgVo.setStatus_value2(socketMsgVos[0].getStatus_value());
                     //记录先前时间
-                    this.socketMsgVo.setTime2(socketMsgVos[0].getTime());
+//                    this.socketMsgVo.setTime2(socketMsgVos[0].getTime());
                     //记录先前状况
-                    this.socketMsgVo.setStatus2(socketMsgVos[0].getStatus());
+//                    this.socketMsgVo.setStatus2(socketMsgVos[0].getStatus());
                     //记录改变原因
-                    this.socketMsgVo.setCause(analysis.statusChange(socketMsgVos[0].getStatus_value(),this.socketMsgVo.getStatus_value()));
+//                    this.socketMsgVo.setCause(analysis.statusChange(socketMsgVos[0].getStatus_value(),this.socketMsgVo.getStatus_value()));
 
                     socketMsgVos[1] =(SocketMsgVo)socketMsgVos[0].clone();
                     socketMsgVos[0] =(SocketMsgVo)this.socketMsgVo.clone();
@@ -189,14 +208,25 @@ public class WebSocket {
                 socketMsg.setRoutingKey(socketMsgVos[0].getRoutingKey());
                 socketMsg.setQueueName(socketMsgVos[0].getQueueName());
                 socketMsg.setEquipmentId(socketMsgVos[0].getEquipmentId());
+                socketMsg.setTable(socketMsgVos[0].getTable());
+                socketMsg.setOriginal_information(socketMsgVos[0].getOriginal_information());
                 String str = (Arrays.toString(socketMsgVos[0].getStatus_value()));
                 socketMsg.setStatus_value(str);
                 socketMsg.setTime(socketMsgVos[0].getTime());
-                socketMsg.setStatus(socketMsgVos[0].getStatus());
-                socketMsg.setCause(socketMsgVos[0].getCause());
-
+//                socketMsg.setStatus(socketMsgVos[0].getStatus());
+//                socketMsg.setCause(socketMsgVos[0].getCause());
+                socketMsg.setLight(socketMsgVos[0].getLight());
+                socketMsg.setDI_1(socketMsgVos[0].getDI_1());
+                socketMsg.setDI_2(socketMsgVos[0].getDI_2());
+                socketMsg.setDI_3(socketMsgVos[0].getDI_3());
+                socketMsg.setDI_4(socketMsgVos[0].getDI_4());
+                socketMsg.setDI_5(socketMsgVos[0].getDI_5());
+                socketMsg.setDI_6(socketMsgVos[0].getDI_6());
+                socketMsg.setDI_7(socketMsgVos[0].getDI_7());
+                socketMsg.setDI_8(socketMsgVos[0].getDI_8());
+                socketMsg.setOriginal_information(socketMsgVos[0].getOriginal_information());
                 int flag = saveMessage(socketMsg);
-                System.out.println(flag);
+//                System.out.println(flag);
 
                 this.session.getAsyncRemote().sendObject(socketMsgVos[0]);
 

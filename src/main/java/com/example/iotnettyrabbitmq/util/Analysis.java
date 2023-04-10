@@ -93,6 +93,23 @@ public class Analysis {
         return news;
     }
 
+    //根据位图数组，分析安灯状态
+    public String lightStatus(String[] Bitmap){
+        String light = "";
+
+        if(Bitmap[6].equals("1")){
+            light = "绿灯";
+        }
+        else if(Bitmap[5].equals("1")){
+            light = "黄灯";
+        }
+        else if(Bitmap[4].equals("1")){
+            light = "红灯";
+        }
+        return light;
+
+    }
+
     //状态发生变化，Bitmap1为先前状态，Bitmap2为当前状态，该方法主要反馈状态的变化
     public String statusChange(String[] Bitmap1,String[] Bitmap2){
         //状态改变消息

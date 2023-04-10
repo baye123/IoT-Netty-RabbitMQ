@@ -7,21 +7,30 @@
         <result property="equipmentId" column="equipment_id"/>
         <result property="status_value" column="status_value"/>
         <result property="time" column="time"/>
-        <result property="status" column="status"/>
-        <result property="cause" column="cause"/>
+<!--        <result property="status" column="status"/>-->
+<!--        <result property="cause" column="cause"/>-->
         <result property="exchangName" column="exchang_name"/>
         <result property="routingKey" column="routing_key"/>
         <result property="queueName" column="queue_name"/>
+        <result property="DI_1" column="DI_1"/>
+        <result property="DI_2" column="DI_2"/>
+        <result property="DI_3" column="DI_3"/>
+        <result property="DI_4" column="DI_4"/>
+        <result property="DI_5" column="DI_5"/>
+        <result property="DI_6" column="DI_6"/>
+        <result property="DI_7" column="DI_7"/>
+        <result property="DI_8" column="DI_8"/>
+        <result property="original_information" column="original_information"/>
     </resultMap>
 
     <!--新增保存数据-->
     <insert id="saveMessage" parameterType="com.example.iotnettyrabbitmq.pojo.SocketMsg">
-        insert into equipment (exchang_name,routing_key,queue_name,equipment_id,status_value, time, status, cause)
-        values (#{exchangName},#{routingKey},#{queueName},#{equipmentId},#{status_value},#{time},#{status},#{cause});
+        insert into ${table} (exchang_name,routing_key,queue_name,equipment_id,light,status_value, time, DI_1, DI_2, DI_3, DI_4, DI_5, DI_6, DI_7, DI_8, original_information)
+        values (#{exchangName},#{routingKey},#{queueName},#{equipmentId},#{light},#{status_value},#{time},#{DI_1},#{DI_2},#{DI_3},#{DI_4},#{DI_5},#{DI_6},#{DI_7},#{DI_8},#{original_information})
     </insert>
 
     <select id="searchMessage" parameterType="com.example.iotnettyrabbitmq.pojo.SocketMsg" resultMap="SocketMsg">
-        select equipment_id, status_value, time, status, cause from equipment;
+        select equipment_id,light,status_value, time, DI_1, DI_2, DI_3, DI_4, DI_5, DI_6, DI_7, DI_8, original_information from equipment-ff;
     </select>
 
 

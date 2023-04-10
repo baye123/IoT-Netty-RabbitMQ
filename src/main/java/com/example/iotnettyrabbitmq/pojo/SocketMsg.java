@@ -20,11 +20,25 @@ public class SocketMsg {
 
         private String equipmentId; //设备id
 
+        private String table; //对应表名
+
+        private String light; //安灯状态
+
         private String status_value; //当前状态值
 
         private String time;//时间
 
-        private String status; //通道状况
+        private String DI_1;
+        private String DI_2;
+        private String DI_3;
+        private String DI_4;
+        private String DI_5;
+        private String DI_6;
+        private String DI_7;
+        private String DI_8;
 
-        private String cause; //改变原因
+
+        private String original_information; //原始消息
+
+        private int mold_closing; //合模次数
 }
