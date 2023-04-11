@@ -18,5 +18,5 @@ public interface SocketMsgMapper {
     //保存一条设备类数据
     int saveMessage(SocketMsg socketMsg);
     //查询设备表
-    List<SocketMsg> searchMessage();
+    List<SocketMsg> searchMessage(String equipmentId,String startTime,String endTime);
 }

@@ -6,7 +6,8 @@
 <!--    <script src="https://www.itxst.com/package/ag-grid/ag-grid-community.js"></script>-->
     <script src="/static/js/ag-grid-community.js" th:src="@{/static/js/ag-grid-community.js}"></script>
 <!--    <link href="https://www.itxst.com/package/ag-grid/styles/ag-grid.css" rel="stylesheet"/>-->
-    <link href="/static/css/ag-grid.css" rel="stylesheet" th:href="@{/static/css/ag-grid.css}"/>
+    <link href="/static/css/ag-grid.css" rel="stylesheet" th:href="@{/static/css/ag-grid.css}" />
+    <link href="/static/laydate/layui.css" rel="stylesheet"th:href="@{/static/laydate/layui.css}" media="all">
 
 </head>
 <body>
@@ -25,15 +26,44 @@
 <!--    <input type="button" value="更新第一行数据" onclick="reset()" />-->
     <input type="button" value="测试数据" onclick="ssc()" />
 </div>
+<div>
+    <input type="button" value="隐藏设置" id="btn" />
+</div>
+
 
 <!--<button type="button" onclick="conectWebSocket()">连接websocket</button>-->
 
 
 <div id="myGrid" style="width: 100%;height: 500px;"  class="ag-theme-balham"></div>
 
-<div id="message"></div>
+<!--<div id="message"></div>-->
+<div class="layui-form-item">
+    <div class="layui-inline">
+        <label class="layui-form-label">时间范围：</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="test1" placeholder="yyyy-MM-dd" lay-key="2">
+        </div>
+
+        <div class="layui-form-mid">-</div>
+
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="test2" placeholder="yyyy-MM-dd" lay-key="3">
+        </div>
+
+        <label class="layui-form-label">设备ID：</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="test3" placeholder="" lay-key="4">
+        </div>
+        <div class="layui-input-inline">
+            <input type="button" class="layui-btn" id="test4" value="搜索" lay-key="5" onclick="searchId()">
+        </div>
+
+    </div>
+</div>
+
 </body>
 <script src='/static/js/jquery-3.6.4.js'></script>
+<script src='/static/laydate/laydate.js'></script>
 <script>
     var formData;
     // var host;
@@ -45,8 +75,6 @@
     //获取表单数据，建立Netty服务器，接收数据并发送到消息队列
     function socketAjax(form){
         formData = new FormData(form);
-        // host = formData.get('host');
-        // port = formData.get('port');
         exchangName = formData.get('exchangName');
         routingKey = formData.get('routingKey');
         queueName = formData.get('queueName');
@@ -69,28 +97,31 @@
         return false;  //阻止表单默认提交
     }
 
-   var socketList ={
-            type: "get",
-            url: "/Websocket/list",
-            dataType:'json',
-            success: function(list){
-                data = JSON.parse(list);
-                setTimeout(function (){$.ajax(socketList);},3000);//3秒定时发送请求
-            }
-    };
+   // var socketList ={
+   //          type: "get",
+   //          url: "/Websocket/list",
+   //          dataType:'json',
+   //          success: function(list){
+   //              data = JSON.parse(list);
+   //              setTimeout(function (){$.ajax(socketList);},3000);//3秒定时发送请求
+   //          }
+   //  };
     //与列对应的数据; 属性名对应上面的field
     var data = [
         {
             equipmentId: 'FF',
-            light:'无',
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
-            time: '',
-            status: 'DI-1通道: 断开  DI-2通道: 断开  DI-3通道: 断开  DI-4通道: 断开  DI-5通道: 断开  DI-6通道: 闭合  DI-7通道: 闭合  DI-8通道: 断开',
-            status_value2: '[0, 0, 0, 0, 0, 0, 0, 0]',
-            time2: '',
-            status2:'[0, 0, 0, 0, 0, 0, 0, 0]',
-            cause:'DI-6通道闭合了  DI-7通道闭合了',
-            sadas:''
+            time: null,
+            light:'无',
+            di_1:'1',
+            di_2:'1',
+            di_3:'1',
+            di_4:'1',
+            di_5:'1',
+            di_6:'1',
+            di_7:'1',
+            di_8:'1',
+            original_information: '123123123'
         },
     ];
     var ssc =function () {
@@ -133,14 +164,14 @@
         { headerName: '安灯状态', field: 'light' },
         { headerName: '当前状态值', field: 'status_value' },
         { headerName: '时间', field: 'time' },
-        { headerName: 'DI-1', field: 'DI_1', width: 80 },
-        { headerName: 'DI-2', field: 'DI_2', width: 80 },
-        { headerName: 'DI-3', field: 'DI_3', width: 80  },
-        { headerName: 'DI-4', field: 'DI_4', width: 80  },
-        { headerName: 'DI-5', field: 'DI_5', width: 80  },
-        { headerName: 'DI-6', field: 'DI_6', width: 80  },
-        { headerName: 'DI-7', field: 'DI_7', width: 80  },
-        { headerName: 'DI-8', field: 'DI_8', width: 80  },
+        { headerName: 'DI-1', field: 'di_1', width: 80 },
+        { headerName: 'DI-2', field: 'di_2', width: 80 },
+        { headerName: 'DI-3', field: 'di_3', width: 80  },
+        { headerName: 'DI-4', field: 'di_4', width: 80  },
+        { headerName: 'DI-5', field: 'di_5', width: 80  },
+        { headerName: 'DI-6', field: 'di_6', width: 80  },
+        { headerName: 'DI-7', field: 'di_7', width: 80  },
+        { headerName: 'DI-8', field: 'di_8', width: 80  },
         { headerName: 'original_information', field: 'original_information' },
 
     ];
@@ -154,30 +185,30 @@
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
             time: null,
             light:'无',
-            DI_1:'1',
-            DI_2:'1',
-            DI_3:'1',
-            DI_4:'1',
-            DI_5:'1',
-            DI_6:'1',
-            DI_7:'1',
-            DI_8:'1',
+            di_1:'1',
+            di_2:'1',
+            di_3:'1',
+            di_4:'1',
+            di_5:'1',
+            di_6:'1',
+            di_7:'1',
+            di_8:'1',
             original_information: '123123123'
 
         },
         {
-            equipmentId: '12',
+            equipmentId: 'FE',
             status_value: '[0, 1, 1, 0, 0, 0, 0, 0]',
             time: null,
             light:'无',
-            DI_1:'1',
-            DI_2:'1',
-            DI_3:'1',
-            DI_4:'1',
-            DI_5:'1',
-            DI_6:'1',
-            DI_7:'1',
-            DI_8:'1',
+            di_1:'1',
+            di_2:'1',
+            di_3:'1',
+            di_4:'1',
+            di_5:'1',
+            di_6:'1',
+            di_7:'1',
+            di_8:'1',
             original_information: '123123123'
         },
 
@@ -185,7 +216,10 @@
 
     //底部合计行
     var botRows=[
-        { name: '置顶行1', sex: 'X', age: '15', 'jg': '中国', 'sf': '顶部1', 'dz': '杭州市文一西路' }
+        { equipmentId: '合模次数',
+            light:'',
+            status_value:''
+        }
 
     ];
 
@@ -230,6 +264,79 @@
         new agGrid.Grid(eGridDiv, gridOptions);
     });
 
+    //隐藏设置
+    function my(id) {
+        return document.getElementById(id);
+    };
+    my("btn").onclick=function(){
+        if (this.value =="隐藏设置") {
+            my("socket").style.display="none";
+            this.value="显示设置";
+        } else if(this.value =="显示设置"){
+            my("socket").style.display="block";
+            this.value="隐藏设置";
+        }
+    };
+
+    //时间选择器
+    //执行一个laydate实例
+    laydate.render({
+        elem: '#test1', //指定元素
+        type: 'datetime'
+    });
+    laydate.render({
+        elem: '#test2', //指定元素
+        type: 'datetime'
+    });
+
+    function searchId(){
+      var equipmentId;
+      var startTime;
+      var endTime;
+      equipmentId = document.getElementById('test3').value;
+      startTime = document.getElementById('test1').value;
+      endTime = document.getElementById('test2').value;
+      if((endTime == null && startTime != null) ||(endTime != null && startTime == null)){
+          alert("请选择时间范围");
+          return;
+      }
+        $.ajax({
+                type: "get",
+                url: "/Websocket/list",
+                dataType: 'json',
+                data:{
+                    "startTime": startTime,
+                    "endTime": endTime,
+                    "equipmentId": equipmentId
+                },
+                success: function(list){
+                    var arr = [];
+                    for(var i in list){
+                        arr.push(list[i]);
+                    }
+                    data = arr;
+                    var count = 0;
+                    var equipmentId = document.getElementById('test3').value;
+                    for(var i=0; i<data.length;i++){
+                        if(data[i].di_1 == "1"){
+                            count++;
+                        }
+                    }
+                    botRows = [
+                        { equipmentId: '合模次数',
+                            light: equipmentId,
+                            status_value: count
+                        }
+                    ]
+                    gridOptions.api.setPinnedBottomRowData(botRows);
+                    gridOptions.api.setRowData(data);
+
+                }
+            })
+    }
+
+
+
 
 </script>
 
@@ -257,27 +364,45 @@
             var socketMsg = event.data;
             console.log("111");
             var json = JSON.parse(socketMsg);
-            console.log(json);
-            // 写死的位置，位置一对一一个设备
-            topRows[0].equipmentId = json.equipmentId;
-            topRows[0].status_value =json.status_value;
-            topRows[0].time = json.time;
-            // topRows[0].status = json.status;
-            // topRows[0].status_value2 = json.status_value2;
-            // topRows[0].time2 = json.time2;
-            // topRows[0].status2 = json.status2;
-            // topRows[0].cause = json.cause;
-            topRows[0].light = json.light;
-            //序列转化，全大写默认改为小写 DI_1——》di_1
-            topRows[0].DI_1 = json.di_1;
-            topRows[0].DI_2 = json.di_2;
-            topRows[0].DI_3 = json.di_3;
-            topRows[0].DI_4 = json.di_4;
-            topRows[0].DI_5 = json.di_5;
-            topRows[0].DI_6 = json.di_6;
-            topRows[0].DI_7 = json.di_7;
-            topRows[0].DI_8 = json.di_8;
-            topRows[0].original_information = json.original_information;
+            // 写死的位置，位置一对一一个设备\
+            if (json.equipmentId == "FF"){
+                topRows[0].equipmentId = json.equipmentId;
+                topRows[0].status_value =json.status_value;
+                topRows[0].time = json.time;
+                topRows[0].light = json.light;
+                //序列转化，全大写默认改为小写 DI_1——》di_1
+                topRows[0].di_1 = json.di_1;
+                topRows[0].di_2 = json.di_2;
+                topRows[0].di_3 = json.di_3;
+                topRows[0].di_4 = json.di_4;
+                topRows[0].di_5 = json.di_5;
+                topRows[0].di_6 = json.di_6;
+                topRows[0].di_7 = json.di_7;
+                topRows[0].di_8 = json.di_8;
+                topRows[0].original_information = json.original_information;
+                console.log(1);
+            }
+            else if(json.equipmentId == "FE"){
+                topRows[1].equipmentId = json.equipmentId;
+                topRows[1].status_value =json.status_value;
+                topRows[1].time = json.time;
+                topRows[1].light = json.light;
+                //序列转化，全大写默认改为小写 DI_1——》di_1
+                topRows[1].di_1 = json.di_1;
+                topRows[1].di_2 = json.di_2;
+                topRows[1].di_3 = json.di_3;
+                topRows[1].di_4 = json.di_4;
+                topRows[1].di_5 = json.di_5;
+                topRows[1].di_6 = json.di_6;
+                topRows[1].di_7 = json.di_7;
+                topRows[1].di_8 = json.di_8;
+                topRows[1].original_information = json.original_information;
+                console.log(2)
+            }
+            else {
+                alert("未设置设备，请到后台设置。")
+            }
+
             var params = {
                 force: true
             };

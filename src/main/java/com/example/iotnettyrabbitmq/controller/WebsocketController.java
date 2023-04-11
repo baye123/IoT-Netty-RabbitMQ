@@ -5,10 +5,7 @@ import com.example.iotnettyrabbitmq.service.SocketMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,11 +22,18 @@ public class WebsocketController {
     private SocketMsgService socketMsgService;
 
 
+//    @ResponseBody
+//    @GetMapping("/list")
+//    public List<SocketMsg> searchEquipmentList(Model model){
+//         List<SocketMsg> socketMsgList = socketMsgService.searchMessage();
+//         return socketMsgList;
+//    }
+
     @ResponseBody
     @GetMapping("/list")
-    public List<SocketMsg> searchEquipmentList(Model model){
-         List<SocketMsg> socketMsgList = socketMsgService.searchMessage();
-         return socketMsgList;
+    public List<SocketMsg> searchEquipmentList(@RequestParam(value = "equipmentId",defaultValue = "FF") String equipmentId,@RequestParam(value = "startTime",defaultValue = "0") String startTime,@RequestParam(value = "endTime",defaultValue = "0") String endTime){
+        List<SocketMsg> socketMsgList = socketMsgService.searchMessage(equipmentId,startTime,endTime);
+        return socketMsgList;
     }
 
 

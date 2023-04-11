@@ -30,7 +30,14 @@
     </insert>
 
     <select id="searchMessage" parameterType="com.example.iotnettyrabbitmq.pojo.SocketMsg" resultMap="SocketMsg">
-        select equipment_id,light,status_value, time, DI_1, DI_2, DI_3, DI_4, DI_5, DI_6, DI_7, DI_8, original_information from equipment-ff;
+        select equipment_id,light,status_value, time, DI_1, DI_2, DI_3, DI_4, DI_5, DI_6, DI_7, DI_8, original_information from equipment
+        where 1=1
+        <if test='equipmentId!= "0"'>
+            and equipment_id = #{equipmentId}
+        </if>
+        <if test='startTime!= "0" and endTime != "0"'>
+            and time between #{startTime} and #{endTime}
+        </if>
     </select>
 
 

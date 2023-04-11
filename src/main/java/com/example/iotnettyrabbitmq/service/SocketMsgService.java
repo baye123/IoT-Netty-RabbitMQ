@@ -16,5 +16,5 @@ public interface SocketMsgService {
     public int saveMessage(SocketMsg socketMsg);
 
     //查询设备表
-    List<SocketMsg> searchMessage();
+    List<SocketMsg> searchMessage(String equipmentId,String startTime,String endTime);
 }

@@ -25,8 +25,8 @@ public class SocketMsgServiceImpl implements SocketMsgService {
         return socketMsgMapper.saveMessage(socketMsg);
     }
     @Override
-    public List<SocketMsg> searchMessage(){
-        return socketMsgMapper.searchMessage();
+    public List<SocketMsg> searchMessage(String equipmentId,String startTime,String endTime){
+        return socketMsgMapper.searchMessage(equipmentId,startTime,endTime);
     }
 
 }
