@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>IoT模块数据采集</title>
-<!--    <script src="https://www.itxst.com/package/ag-grid/ag-grid-community.js"></script>-->
     <script src="/static/js/ag-grid-community.js" th:src="@{/static/js/ag-grid-community.js}"></script>
-<!--    <link href="https://www.itxst.com/package/ag-grid/styles/ag-grid.css" rel="stylesheet"/>-->
     <link href="/static/css/ag-grid.css" rel="stylesheet" th:href="@{/static/css/ag-grid.css}" />
     <link href="/static/laydate/layui.css" rel="stylesheet"th:href="@{/static/laydate/layui.css}" media="all">
 
@@ -24,7 +22,7 @@
     <input type="button" value="建立websocket连接" onclick="conectWebSocket()" />
     <input type="button" value="websocket请求队列数据" onclick="send()" />
 <!--    <input type="button" value="更新第一行数据" onclick="reset()" />-->
-    <input type="button" value="测试数据" onclick="ssc()" />
+<!--    <input type="button" value="测试数据" onclick="ssc()" />-->
 </div>
 <div>
     <input type="button" value="隐藏设置" id="btn" />
@@ -57,6 +55,9 @@
         <div class="layui-input-inline">
             <input type="button" class="layui-btn" id="test4" value="搜索" lay-key="5" onclick="searchId()">
         </div>
+        <div class="layui-input-inline">
+            <input type="button" class="layui-btn" id="test5" value="导出表格" style="float: right" onclick="excelWrite()">
+        </div>
 
     </div>
 </div>
@@ -71,6 +72,7 @@
     var exchangName;
     var routingKey;
     var queueName;
+    var listData;
 
     //获取表单数据，建立Netty服务器，接收数据并发送到消息队列
     function socketAjax(form){
@@ -80,33 +82,9 @@
         queueName = formData.get('queueName');
 
         alert("保存信息成功！")
-        // ajax获取表单数据异步处理Netty-Rabbit服务器搭建方式
-        // $.ajax({
-        //     type: "post",
-        //     url: "/Netty/server",
-        //     data:{
-        //         "host": host,
-        //         "port": port,
-        //         "exchangName": exchangName,
-        //         "routingKey": routingKey
-        //     },
-        //     success: function(data){
-        //
-        //     }
-        // })
         return false;  //阻止表单默认提交
     }
 
-   // var socketList ={
-   //          type: "get",
-   //          url: "/Websocket/list",
-   //          dataType:'json',
-   //          success: function(list){
-   //              data = JSON.parse(list);
-   //              setTimeout(function (){$.ajax(socketList);},3000);//3秒定时发送请求
-   //          }
-   //  };
-    //与列对应的数据; 属性名对应上面的field
     var data = [
         {
             equipmentId: 'FF',
@@ -124,39 +102,6 @@
             original_information: '123123123'
         },
     ];
-    var ssc =function () {
-        $.ajax({
-            url: "/Websocket/list",
-            type: "get",
-            dataType: 'json',
-            success: function (list) {
-                // data = JSON.parse(list);
-                // console.log(list)
-                var arr = [];
-                for(var i in list){
-                    arr.push(list[i]);
-                }
-                // for(var i in arr){
-                //     data[i].equipmentId = arr[i].equipmentId;
-                //     data[i].status_value =arr[i].status_value;
-                //     data[i].time = arr[i].time;
-                //     data[i].status = arr[i].status;
-                //     // data[i].status_value2 = arr[i].status_value2;
-                //     // data[i].time2 = arr[i].time2;
-                //     // data[i].status2 = arr[i].status2;
-                //     data[i].cause = arr[i].cause;
-                // }
-                data =arr;
-                console.log(data);
-
-                gridOptions.api.setRowData (data);
-            },
-
-        });
-        return ssc;
-    }
-    //轮询
-    // setInterval(ssc(),5000);
 
     //定义表格列
     var columnDefs = [
@@ -311,10 +256,12 @@
                 },
                 success: function(list){
                     var arr = [];
+
                     for(var i in list){
                         arr.push(list[i]);
                     }
                     data = arr;
+                    listData = list;
                     var count = 0;
                     var equipmentId = document.getElementById('test3').value;
                     for(var i=0; i<data.length;i++){
@@ -333,6 +280,9 @@
 
                 }
             })
+    };
+    function excelWrite(){
+        window.open("/Websocket/write");
     }
 
 
